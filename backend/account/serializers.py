@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from account.models import User
+from .models import CompanyProfile, CandidateProfile
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -33,3 +34,14 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Incorrect email or password.")
         else:
             raise serializers.ValidationError("Both email and password are required.")
+
+class CompanyProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyProfile
+        fields = '__all__'
+
+class CandidateProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CandidateProfile
+        fields = '__all__'
+    
