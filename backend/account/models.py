@@ -15,7 +15,6 @@ class User(AbstractUser, PermissionsMixin):
     ]
 
     email = models.EmailField(verbose_name='Email', max_length=255, unique=True)
-    username = models.CharField(max_length=150, unique=True)
     phone_number = models.CharField(max_length=14)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=CANDIDATE)
     is_active = models.BooleanField(default=True)
@@ -29,15 +28,17 @@ class User(AbstractUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
 
     # Set the fields from AbstractUser to None to exclude them from being saved
     first_name = None
     last_name = None
+    username = None
+    last_login = None
     
 
     def __str__(self):
-        return self.username
+        return self.email
 
 class CompanyProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='user', related_name='company_profile')
@@ -57,6 +58,7 @@ class CompanyProfile(models.Model):
 
 class CandidateProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name='user', related_name='candidate_profile')
+    name = models.CharField(verbose_name='name', blank=False, null=False)
     birthday = models.DateField(verbose_name='birth date', blank=True, null=True)
     location = models.CharField(max_length=255, verbose_name='location')
     skills = models.CharField(max_length=255, verbose_name='skills', blank=True, null=True)
@@ -70,7 +72,7 @@ class CandidateProfile(models.Model):
         db_table = 'candidate_profile'
 
     def __str__(self):
-        return f"{self.user.username}'s Profile"
+        return f"{self.name}'s Profile"
 
     
 

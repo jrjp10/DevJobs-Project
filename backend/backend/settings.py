@@ -56,9 +56,6 @@ INSTALLED_APPS = [
     'account',
     'job',
 
-
-
-
 ]
 
 MIDDLEWARE = [
@@ -155,7 +152,7 @@ VIRTUAL_ENV_BASE = os.environ.get('VIRTUAL_ENV')
 print(VIRTUAL_ENV_BASE)
 
 # Migrate after mentioning it
-AUTH_USER_MODEL = 'account.User' 
+AUTH_USER_MODEL = 'account.User'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=15),

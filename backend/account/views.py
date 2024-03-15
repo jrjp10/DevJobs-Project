@@ -7,8 +7,10 @@ from rest_framework import generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 from .serializers import UserRegistrationSerializer, LoginSerializer, CompanyProfileSerializer, CandidateProfileSerializer
-from .models  import CompanyProfile, CandidateProfile
+from .models  import User, CompanyProfile, CandidateProfile
 
 # Generate Token Manually
 def get_token_for_users(user):
@@ -53,17 +55,23 @@ class LoginView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+# To create Company Profile
 class CompanyProfileCreateView(generics.CreateAPIView):
     queryset = CompanyProfile.objects.all()
     serializer_class = CompanyProfileSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes=[IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        if self.request.user.role != User.COMPANY:
+            return Response({"error": "Only users with the role 'company' are allowed to create company profiles."}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            serializer.save(user=self.request.user)
+        except IntegrityError:
+            return Response({"error": "A company profile already exists for this user."}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# To create Candidate Profile
 class CandidateProfileCreateView(generics.CreateAPIView):
     queryset = CandidateProfile.objects.all()
     serializer_class = CandidateProfileSerializer
@@ -71,46 +79,87 @@ class CandidateProfileCreateView(generics.CreateAPIView):
     permission_classes=[IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        if self.request.user.role != User.CANDIDATE:
+            return Response({"error": "Only users with the role 'Candidate' are allowed to create Candidate profiles."}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            serializer.save(user=self.request.user)
+        except IntegrityError:
+            return Response({"error": "A candidate profile already exists for this user."}, status=status.HTTP_400_BAD_REQUEST)
+        
+# TO list all the Candidate
+class CandidateProfileListView(generics.ListAPIView):
+    queryset = CandidateProfile.objects.all()
+    serializer_class = CandidateProfileSerializer
 
+
+# TO list all the Company
+class ComapanyProfileListView(generics.ListAPIView):
+    queryset = CompanyProfile.objects.all()
+    serializer_class = CompanyProfileSerializer
+
+
+
+# For CRUD Operation of Company Profile
 class CompanyProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CompanyProfileSerializer
-    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    authentication_classes  = [JWTAuthentication]
+
 
     def get_queryset(self):
         return CompanyProfile.objects.filter(user=self.request.user)
+
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs['pk'])
+        if self.request.user.role != User.COMPANY or obj.user != self.request.user:
+            raise PermissionDenied("You do not have permission to perform this action.")
+        return obj
     
     def perform_update(self, serializer):
-        instance = self.get_object()
-        if instance.user == self.request.user:
-            serializer.save()
-        else:
-            raise PermissionDenied("You do not have permission to update this profile.")
+        try:
+            instance = serializer.save()
+            return Response({"message": "Company profile updated successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
     def perform_destroy(self, instance):
-        if instance.user == self.request.user:
+        try:
             instance.delete()
-        else:
-            raise PermissionDenied("You do not have permission to delete this profile.")
+            return Response({"message": "Company profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except Exception  as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    
+
+
+# For CRUD Operation of Candidate Profile
 class CandidateProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CandidateProfileSerializer
-    authentication_classes  = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+    authentication_classes  = [JWTAuthentication]
+
 
     def get_queryset(self):
         return CandidateProfile.objects.filter(user=self.request.user)
 
-    def perform_update(self, serializer):
-        instance = self.get_object()
-        if instance.user == self.request.user:
-            serializer.save()
-        else:
-            raise PermissionDenied("You do not have permission to update this profile.")
+    def get_object(self):
+        obj = get_object_or_404(self.get_queryset(), pk=self.kwargs['pk'])
+        if self.request.user.role != User.CANDIDATE or obj.user != self.request.user:
+            raise PermissionDenied("You do not have permission to perform this action.")
+        return obj
     
-    def  perform_destroy(self, instance):
-        if instance.user == self.request.user:
+    def perform_update(self, serializer):
+        try:
+            instance = serializer.save()
+            return Response({"message": "Candidate profile updated successfully."}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def perform_destroy(self, instance):
+        try:
             instance.delete()
-        else:
-            raise PermissionDenied(("You do not have permission to update this profile."))
+            return Response({"message": "Candidate profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

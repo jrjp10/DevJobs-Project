@@ -9,13 +9,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id','email', 'username', 'phone_number',  'role','password', 'created_at', 'updated_at')
+        fields = ('id','email', 'phone_number',  'role','password', 'created_at', 'updated_at')
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         validated_data['password']=make_password(validated_data.get('password'))
         return super().create(validated_data)
     
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -35,13 +37,37 @@ class LoginSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError("Both email and password are required.")
 
+
+
 class CompanyProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyProfile
-        fields = '__all__'
+        fields = ('company_name','industry', 'location', 'website', 'description')
 
+    def validate(self, attrs):
+        user = self.context['request'].user
+        if user.role != User.COMPANY:
+            raise serializers.ValidationError("Only users with the role 'company' are allowed to create company profiles.")
+        return attrs
+        
+    def create(self, validated_data, **kwargs):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data, **kwargs)
+
+
+
+    
 class CandidateProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = CandidateProfile
-        fields = '__all__'
+        fields = ('name', 'birthday', 'location', 'skills', 'experience', 'education',  'resume')
     
+    def validate(self, attrs):
+        user = self.context['request'].user
+        if  user.role != User.CANDIDATE:
+            raise serializers.ValidationError("Only users with the role 'candidate' are allowed to create candidate profiles.")
+        return attrs
+    
+    def  create(self, validated_data, **kwargs):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data, **kwargs)
