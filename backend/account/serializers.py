@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
+from rest_framework.exceptions import ValidationError
 from account.models import User
 from .models import CompanyProfile, CandidateProfile
 
@@ -71,3 +72,51 @@ class CandidateProfileSerializer(serializers.ModelSerializer):
     def  create(self, validated_data, **kwargs):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data, **kwargs)
+    
+class UserChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(write_only=True, required=True)
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class SendPasswordResetEmailSerializer(serializers.Serializer):
+#     email = serializers.EmailField(max_length=255)
+
+#     class Meta:
+#         fields = ['email']
+    
+#     def validate(self, attrs):
+#         email =attrs.get('email')
+#         if User.objects.filter(email=email).exists():
+#             user = User.objects.get(email=email)
+#             uid = urlsafe_base64_encode(forcebytes(user.id))
+#             print('Encoded UID', uid)
+#             token = SendPasswordResetTokenGenerateor().make_token(user)
+#             print('password reset Token', token)
+#             link = 'http://localhost:3000/api/user/reset/'+uid'/'+token'
+#             print('password reset Link')
+#             return attrs
+#         else:
+#             raise ValidationError('You are not a Registerd User')

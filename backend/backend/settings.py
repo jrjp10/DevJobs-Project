@@ -52,9 +52,11 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     "rest_framework",
     # 'storages',
+    'drf_yasg',
     'django_filters',
     'account',
     'job',
+
 
 ]
 

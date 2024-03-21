@@ -9,8 +9,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import PermissionDenied
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
-from .serializers import UserRegistrationSerializer, LoginSerializer, CompanyProfileSerializer, CandidateProfileSerializer
+from .serializers import UserRegistrationSerializer, LoginSerializer, CompanyProfileSerializer, CandidateProfileSerializer, UserChangePasswordSerializer
 from .models  import User, CompanyProfile, CandidateProfile
+
 
 # Generate Token Manually
 def get_token_for_users(user):
@@ -163,3 +164,65 @@ class CandidateProfileRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAP
             return Response({"message": "Candidate profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserChangePasswordUpdateView(generics.UpdateAPIView):
+    serializer_class = UserChangePasswordSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Retrive the current User
+        user = self.request.user
+        # Get old and new  password from request data
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        # Check if old password is correct
+        if not user.check_password(old_password):
+            return Response({'error':"Old password doesn't match"})
+
+        # Change  Password
+        try:
+            user.set_password(new_password)
+            user.save()
+            return Response({"Message": "Password Changed Successfully"})
+        except Exception as e:
+            return Response({'error':str(e)},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class SendPasswordResetEmailView(generics.GenericAPIView):
+#     serializer_class = SendPasswordResetEmailSerializer
+#     permission_classes = [IsAuthenticated]
+#     authentication_classes = [JWTAuthentication]
+
+#     def post(self, request, format=None):
+#         serializer = SendPasswordResetEmailSerializer(data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             return Response({'msg':'Password Reset link send. Please check your Email'}, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+
+

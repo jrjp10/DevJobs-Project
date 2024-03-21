@@ -1,6 +1,6 @@
 from django.urls  import path, include
 from .import views
-from account.views import UserRegistrationView, LoginView, CompanyProfileCreateView, ComapanyProfileListView, CandidateProfileCreateView, CandidateProfileListView,CompanyProfileRetrieveUpdateDestroyView, CandidateProfileRetrieveUpdateDestroyView
+from account.views import UserRegistrationView, LoginView, CompanyProfileCreateView, ComapanyProfileListView, CandidateProfileCreateView, CandidateProfileListView,CompanyProfileRetrieveUpdateDestroyView, CandidateProfileRetrieveUpdateDestroyView, UserChangePasswordUpdateView
 # UserChangePasswordUpdateView
 
 urlpatterns = [
@@ -15,5 +15,5 @@ urlpatterns = [
     path('candidateprofiles-list/', CandidateProfileListView.as_view(),name='candidate-list'),
     path('candidate-profiles/<int:pk>/', CandidateProfileRetrieveUpdateDestroyView.as_view(), name='candidate-profile-detail'),
     
-    # path('change-password/',UserChangePasswordUpdateView.as_view(),name="change-password"),
+    path('change-password/',UserChangePasswordUpdateView.as_view(),name="change-password"),
 ]
