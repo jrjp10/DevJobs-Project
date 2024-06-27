@@ -14,6 +14,7 @@ from .models import Subscription, SubscriptionPlan, Payment
 from .serializer import SubscriptionPlanSerializer, PaymentSerializer, SubscriptionSerializer
 from .client import RazorpayClient
 from account.api.permissions import IsCompanyUser, IsAdminUser
+from job.api.pagination import CustomPagination
 
 
 
@@ -155,14 +156,28 @@ class VerifyPaymentView(APIView):
 admin featues in payment
 """
 
-# class AdminSubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     """
-#     API view to retrieve, update, or delete a subscription plan for admin.
-#     """
-#     queryset = SubscriptionPlan.objects.all()
-#     serializer_class = SubscriptionPlanSerializer
-#     permission_classes = [IsAuthenticated, IsAdminUser]
-#     authentication_classes = [JWTAuthentication]
+class AdminSubscriptionPlanCreateView(generics.CreateAPIView):
+    """
+    API view to create a new subscription plan for admin.
+    """
+    queryset = SubscriptionPlan.objects.all()
+    serializer_class = SubscriptionPlanSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+
+    
+
+class AdminSubscriptionPlanDetailView(generics.RetrieveUpdateDestroyAPIView):
+    
+    """
+    API view to retrieve, update, or delete a subscription plan for admin.
+    """
+
+    queryset = SubscriptionPlan.objects.all()
+    serializer_class = SubscriptionPlanSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+    lookup_field = 'uuid'
 
 class AdminSubscriptionListView(generics.ListAPIView):
     """
@@ -172,6 +187,7 @@ class AdminSubscriptionListView(generics.ListAPIView):
     serializer_class = SubscriptionSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [JWTAuthentication]
+    pagination_class = CustomPagination
 
 class AdminPaymentListView(generics.ListAPIView):
     """
@@ -181,4 +197,8 @@ class AdminPaymentListView(generics.ListAPIView):
     serializer_class = PaymentSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]
     authentication_classes = [JWTAuthentication]
+    pagination_class = CustomPagination
+
+
+
 

@@ -16,6 +16,7 @@ urlpatterns = [
     path("company/create/", CompanyProfileCreateView.as_view(),  name='company_profile_create'),
     path("company/list/", CompanyProfileListView.as_view(), name='company_profile_update'),
     path('company/<uuid:uuid>/', CompanyProfileCRUDView.as_view(), name='company-profile-detail'),
+    path("public/companies/", CompanyProfilePublicListView.as_view(), name='public_company_view'),
 
 
     # urls for Admin Dashboard
@@ -23,6 +24,7 @@ urlpatterns = [
     path('users/<uuid:uuid>/', UserDetailView.as_view(), name='user-detail'),
     path("candidates/", CandidateProfileListView.as_view(),  name='candidates'),
     path("companies/", CompanyProfileListView.as_view(),  name='companies'),
+    
 
 
 ]

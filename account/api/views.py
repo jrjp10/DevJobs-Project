@@ -15,6 +15,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import AllowAny
 
 from .serializers import *
 from ..models import *
@@ -55,7 +56,7 @@ class UserRegistration(APIView):
                 recipient_list=[user.email],
             )
             return Response(
-                {'message': "User registration success. Check Your Email for Account activation Link.",'user': serializer.data}, status=status.HTTP_201_CREATED)
+                {'message': "User registration success. Check Your Email for Account activation Link.", 'user': serializer.data}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -66,7 +67,7 @@ class ActivateAccountView(APIView):
 
     Activates user account when the user clicks on the activation link sent via email.
     """
-     
+
     def get(self, request, uidb64, token):
         try:
             uid = force_text(urlsafe_base64_decode(uidb64))
@@ -136,6 +137,23 @@ class CompanyProfileCreateView(APIView):
             except IntegrityError:
                 return Response({"error": "A company profile already exists for this user."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+"""
+View for homepage to show all company that registered/listed
+"""
+class CompanyProfilePublicListView(APIView):
+    """
+    API view for listing all company profiles.
+    Allows all users to retrieve a list of all company profiles.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        profiles = CompanyProfile.objects.all()
+        serializer = PublicCompanyProfileSerializer(profiles, many=True)
+        return Response(serializer.data)
 
 
 class CandidateProfileCreateView(APIView):
@@ -186,7 +204,6 @@ class CompanyProfileCRUDView(APIView):
         return obj
 
     def get(self, request, uuid):
-
         """Retrieve a company profile."""
 
         profile = self.get_object(uuid)
@@ -194,7 +211,6 @@ class CompanyProfileCRUDView(APIView):
         return Response(serializer.data)
 
     def put(self, request, uuid):
-
         """Update company profile"""
 
         profile = self.get_object(uuid)
@@ -206,8 +222,6 @@ class CompanyProfileCRUDView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, uuid):
-
-        
         """delete a company profile."""
 
         profile = self.get_object(uuid)
@@ -235,7 +249,6 @@ class CandidateProfileCRUDView(APIView):
         return obj
 
     def get(self, request, uuid):
-
         """Retrieve a candidate profile."""
 
         profile = self.get_object(uuid)
@@ -243,7 +256,6 @@ class CandidateProfileCRUDView(APIView):
         return Response(serializer.data)
 
     def put(self, request, uuid):
-
         """Update company profile"""
 
         profile = self.get_object(uuid)
@@ -255,7 +267,6 @@ class CandidateProfileCRUDView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, uuid):
-    
         """delete company profile"""
 
         profile = self.get_object(uuid)
@@ -263,12 +274,13 @@ class CandidateProfileCRUDView(APIView):
         return Response({"message": "Candidate profile deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
-
 """ 
 Admin Dashboard Views 
 """
 
 # To list all the user
+
+
 class UserListView(APIView):
 
     """
@@ -295,6 +307,7 @@ class UserListView(APIView):
         return Response({"message": "Inactive users deleted successfully."},
                         status=status.HTTP_204_NO_CONTENT)
 
+
 class UserDetailView(APIView):
     """
     API view for deleting a specific user by their ID.
@@ -304,7 +317,7 @@ class UserDetailView(APIView):
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
 
-    def delete(self, request,uuid):
+    def delete(self, request, uuid):
         try:
             user = User.objects.get(uuid=uuid)
             user.delete()
@@ -313,6 +326,7 @@ class UserDetailView(APIView):
             return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
 # To list all the candidate user
+
 
 class CandidateProfileListView(APIView):
 
@@ -347,4 +361,4 @@ class CompanyProfileListView(APIView):
         profiles = CompanyProfile.objects.all()
         serializer = CompanyProfileSerializer(profiles, many=True)
         return Response(serializer.data)
- 
+

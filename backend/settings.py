@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 dotenv.load_dotenv()
 
-# for forcetext debug code
+# for forcetext debug codeA
 # debug for forcetext
 import django
 from django.utils.encoding import force_str
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
     'django_filters',
+    'debug_toolbar',
      # My apps
     'account',
     'job',
@@ -71,6 +72,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -217,3 +219,23 @@ RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
     raise ValueError("RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET must be set in the environment.")
 
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+CACHE_TTL = 60 * 60  # 60 minutes
+
+INTERNAL_IPS = [
+    # ...
+    "127.0.0.1",
+    # ...
+]

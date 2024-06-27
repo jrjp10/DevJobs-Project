@@ -12,13 +12,13 @@ class ApplicationSerializer(serializers.ModelSerializer):
     instead of their UUIDs.
     """
 
-    candidate_name = serializers.CharField(source='candidate.name')
-    job_title = serializers.CharField(source='job.title')
-    company_name = serializers.CharField(source='job.company')
+    candidate_name = serializers.CharField(source='candidate.name', read_only=True)
+    job_title = serializers.CharField(source='job.title', read_only=True)
+    company_name = serializers.CharField(source='job.company.name', read_only=True)
 
     class Meta:
         model = Application
-        fields = ['uuid', 'candidate_name', 'job_title', 'company_name', 'application_date', 'status']
+        fields = ['uuid', 'candidate_name', 'job_title', 'company_name', 'application_date', 'status', 'candidate', 'job']
 
     
     def validate(self, attrs):
@@ -29,10 +29,19 @@ class ApplicationSerializer(serializers.ModelSerializer):
         Checks if an application already exists for the given candidate and job combination.
         """
 
-        candidate = attrs.get('candidate')
+        request = self.context.get('request')
+        if not request:
+            raise serializers.ValidationError("request context is missing")
+        
+        candidate = getattr(request.user, 'candidate_profile', None)
+        if not candidate:
+            raise serializers.ValidationError("Candidate profile not found")
+        
+        
         job = attrs.get('job')
         if Application.objects.filter(candidate=candidate, job=job).exists():
             raise serializers.ValidationError({'error': 'Application already exists.'})
+        
         return attrs
     
 

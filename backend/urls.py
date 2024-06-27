@@ -42,7 +42,7 @@ urlpatterns = [
     path('api/account/', include(('account.api.urls', 'account'), namespace='account')),
     path('api/', include(('job.api.urls', 'job'), namespace='job')),
     path('api/candidate/', include(('experience.urls', 'expereince'), namespace='experience')),
-    path('api/candidate/', include(('application.urls', 'application'), namespace='application')),
+    path('api/application/', include(('application.urls', 'application'), namespace='application')),
     path('api/payment/', include(('payment.urls', 'payment'), namespace='payment')),
     
 
@@ -51,3 +51,10 @@ urlpatterns = [
 
 handler500 = 'utils.error_views.handler500'
 handler404 = 'utils.error_views.handler404'
+
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

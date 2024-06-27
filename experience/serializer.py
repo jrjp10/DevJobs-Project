@@ -32,10 +32,10 @@ class ExperienceSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('End date cannot be before start date')
         return attrs
     
-    def save(self, **kwargs):
+    def create(self, validate_data):
 
         """
-        Save the Experience instance.
+        create Experience instance.
         This method associates the authenticated user (candidate) with the experience instance
         before saving it. If an instance is provided, it updates it; otherwise, it creates a new one.
         Args:
@@ -46,8 +46,8 @@ class ExperienceSerializer(serializers.ModelSerializer):
 
         # Associate the authenticated user (candidate) with the experience
         candidate_profile = self.context['request'].user.candidate_profile
-        
-        # If an instance is provided, update it; otherwise, create a new one
-        instance = super().save(candidate=candidate_profile, **kwargs)
+        validate_data['candidate'] = candidate_profile
+        return super().create(validate_data)
+    
 
-        return instance
+

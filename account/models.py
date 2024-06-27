@@ -109,9 +109,9 @@ class CandidateProfile(models.Model):
     education = models.CharField(
         max_length=255, verbose_name='education', blank=True, null=True)
     resume = models.FileField(
-        upload_to='resumes', blank=True)
+        upload_to='resumes/', blank=True)
     candidate_image = models.ImageField(
-        upload_to='candidate_images', blank=True, null=True)
+        upload_to='candidate_images/', blank=True, null=True)
 
     class Meta:
         verbose_name = 'candidate_profile'

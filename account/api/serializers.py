@@ -110,6 +110,12 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
          
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data, **kwargs)
+    
+
+class PublicCompanyProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyProfile
+        fields = ['company_name', 'industry', 'location', 'website', 'description', 'company_image']
 
 
 

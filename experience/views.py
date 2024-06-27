@@ -31,8 +31,12 @@ class ExperienceListAPIView(APIView):
     def post(self, request):
         serializer = ExperienceSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save(candidate=CandidateProfile.objects.get(user=request.user))
+            Response_data = {
+                "message": "Experience added",
+                "data": serializer.data
+            }
+            return Response(Response_data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

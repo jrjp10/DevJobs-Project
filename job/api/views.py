@@ -12,6 +12,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import PermissionDenied
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, filters
+from django.core.cache import cache
+from django.conf import settings
 
 from .serializers import JobSerializer
 from ..models import Job
@@ -139,4 +141,8 @@ class AllJob(generics.ListAPIView):
     search_fields = ['title','location', 'job_type', 'education', 'it_industry', 'company__company_name']  # Adjusted search_fields
 
     def get_queryset(self):
-        return Job.objects.all()
+        queryset = cache.get('all_jobs_queryset')
+        if not queryset:
+            queryset = Job.objects.all()
+            cache.set('all_jobs_queryset', queryset, timeout=settings.CACHE_TTL)
+        return queryset
